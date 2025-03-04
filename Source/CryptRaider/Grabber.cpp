@@ -49,6 +49,8 @@ void UGrabber::Grab()
 	FVector End = Start + GetForwardVector() * MaxGrabDiatance;
 
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red);
+	// persist true로 하면 안 사라진다!
+	DrawDebugSphere(GetWorld(), End, 10, 10, FColor::Blue, false, 5);
 
 	// 충돌 감지 하기 위한 형태 - 구 
 	FCollisionShape Sphere = FCollisionShape::MakeSphere(GrabRadius);
@@ -65,6 +67,11 @@ void UGrabber::Grab()
 
 	if (HashHit)
 	{
+		// HitResult Location : 충돌이 발생한 위치(Impact Point보다는 덜 구체적인 값)
+		// HitResult ImpactPoint : 충돌이 실제로 발생한 정확한 지점의 월드 공간 좌표 
+		DrawDebugSphere(GetWorld(), HitResult.Location, 10, 10, FColor::Green, false, 5);
+		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10, 10, FColor::Red, false, 5);
+		
 		AActor* HitActor = HitResult.GetActor();
 		UE_LOG(LogTemp, Display, TEXT("Hit actor: %s"), *HitActor->GetActorNameOrLabel());
 	}else
