@@ -17,3 +17,14 @@ Saved/
 .vs
 .idea
 
+.idea/
+.vs/
+.vscode/
+Binaries/
+Config/
+Content/
+CryptRaider.code-workspace
+CryptRaider.sln
+CryptRaider.uproject
+Intermediate/
+Saved/
