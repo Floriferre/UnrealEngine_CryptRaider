@@ -24,6 +24,13 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION(BlueprintCallable)
+	void Grab();
+	
+	UFUNCTION(BlueprintCallable)	// 블루프린트에서 사용할 수 있다!
+	void Release();
+
+	
 private:
 	UPROPERTY(EditAnywhere)
 	float MaxGrabDiatance = 400;

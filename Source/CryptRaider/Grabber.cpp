@@ -30,12 +30,14 @@ void UGrabber::BeginPlay()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
 
+void UGrabber::Grab()
+{
 	FVector Start = GetComponentLocation();
 	FVector End = Start + GetForwardVector() * MaxGrabDiatance;
 
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red);
-
 
 	// 충돌 감지 하기 위한 형태 - 구 
 	FCollisionShape Sphere = FCollisionShape::MakeSphere(GrabRadius);
@@ -54,7 +56,14 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 	{
 		AActor* HitActor = HitResult.GetActor();
 		UE_LOG(LogTemp, Display, TEXT("Hit actor: %s"), *HitActor->GetActorNameOrLabel());
+	}else
+	{
+		UE_LOG(LogTemp, Display, TEXT("No Hit"));
 	}
-	
+}
+
+void UGrabber::Release()
+{
+	UE_LOG(LogTemp, Display, TEXT("Released Grabber"));
 }
 
