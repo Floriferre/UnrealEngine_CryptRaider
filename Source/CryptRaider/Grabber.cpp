@@ -58,29 +58,11 @@ void UGrabber::Grab()
 		return;
 	}
 
-	
-	FVector Start = GetComponentLocation();
-	FVector End = Start + GetForwardVector() * MaxGrabDiatance;
-
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red);
-	// persist true로 하면 안 사라진다!
-	DrawDebugSphere(GetWorld(), End, 10, 10, FColor::Blue, false, 5);
-
-	// 충돌 감지 하기 위한 형태 - 구 
-	FCollisionShape Sphere = FCollisionShape::MakeSphere(GrabRadius);
 	FHitResult HitResult;
-
-	// Hit 했는지 아닌지 판별
-	bool HashHit = GetWorld()->SweepSingleByChannel(
-		HitResult,
-		Start, End,
-		FQuat::Identity,
-		ECC_GameTraceChannel2,
-		Sphere
-		);
-
+	bool HasHit = GetGrabbableInReach(HitResult);
+	
 	// Hit 했으면 Component를 가져와서 정확한 위치를 잡아 Rotation을 받아온다
-	if (HashHit)
+	if (HasHit)
 	{
 		UPrimitiveComponent* HitComponent = HitResult.GetComponent();
 		HitComponent->WakeAllRigidBodies(); 	// 오랫동안 자극이 없으면 슬립상태가 되어서 클릭이 안된다. 그래서 깨워줘야함!
@@ -103,8 +85,6 @@ void UGrabber::Release()
 		return;
 	}
 
-
-	
 	if (PhysicsHandle->GetGrabbedComponent() != nullptr)	// 만약 물체를 붙잡고 있다면
 	{
 		PhysicsHandle->GetGrabbedComponent()->WakeAllRigidBodies();	// 오랫동안 자극이 없으면 슬립상태가 되어서 클릭이 안된다. 그래서 깨워줘야함!
@@ -121,3 +101,27 @@ UPhysicsHandleComponent* UGrabber::GetPhysicsHandle() const
 	}
 	return Result;
 }
+
+
+bool UGrabber::GetGrabbableInReach(FHitResult& OutHitResult) const
+{
+	FVector Start = GetComponentLocation();
+	FVector End = Start + GetForwardVector() * MaxGrabDiatance;
+
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red);
+	// persist true로 하면 안 사라진다!
+	DrawDebugSphere(GetWorld(), End, 10, 10, FColor::Blue, false, 5);
+
+	// 충돌 감지 하기 위한 형태 - 구 
+	FCollisionShape Sphere = FCollisionShape::MakeSphere(GrabRadius);
+
+	// Hit 했는지 아닌지 판별
+	return GetWorld()->SweepSingleByChannel(
+		OutHitResult,
+		Start, End,
+		FQuat::Identity,
+		ECC_GameTraceChannel2,
+		Sphere
+		);
+}
+
