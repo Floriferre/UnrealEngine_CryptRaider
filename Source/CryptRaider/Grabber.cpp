@@ -4,6 +4,7 @@
 #include "Grabber.h"
 #include "Engine/World.h"	// GetWorld 사용
 #include "DrawDebugHelpers.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"	// 물체를 움켜쥐기 위하여 
 
 
 
@@ -22,6 +23,16 @@ UGrabber::UGrabber()
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UPhysicsHandleComponent* PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (PhysicsHandle != nullptr)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Got Physics Handle: %s"), *PhysicsHandle->GetName());
+	}else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Physics Handle Found!"));
+	}
+	
 
 }
 
