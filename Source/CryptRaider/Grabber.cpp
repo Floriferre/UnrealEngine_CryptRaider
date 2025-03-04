@@ -36,12 +36,25 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red);
 
-	float Damage = 0;
-	float& DamageRef = Damage;
 
-	DamageRef = 5;	// 레퍼런스는 바로 값을 바꿀 수 있다 
-	UE_LOG(LogTemp, Warning, TEXT("DamageRef: %f , Damage : %f"), DamageRef, Damage);
+	// 충돌 감지 하기 위한 형태 - 구 
+	FCollisionShape Sphere = FCollisionShape::MakeSphere(GrabRadius);
+	FHitResult HitResult;
 
+	// Hit 했는지 아닌지 판별
+	bool HashHit = GetWorld()->SweepSingleByChannel(
+		HitResult,
+		Start, End,
+		FQuat::Identity,
+		ECC_GameTraceChannel2,
+		Sphere
+		);
+
+	if (HashHit)
+	{
+		AActor* HitActor = HitResult.GetActor();
+		UE_LOG(LogTemp, Display, TEXT("Hit actor: %s"), *HitActor->GetActorNameOrLabel());
+	}
 	
 }
 
