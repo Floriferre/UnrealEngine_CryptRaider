@@ -4,7 +4,7 @@
 #include "Grabber.h"
 #include "Engine/World.h"	// GetWorld 사용
 #include "DrawDebugHelpers.h"
-#include "PhysicsEngine/PhysicsHandleComponent.h"	// 물체를 움켜쥐기 위하여 
+// #include "PhysicsEngine/PhysicsHandleComponent.h"	// 물체를 움켜쥐기 위하여 -> 헤더에 넣었으니 삭제
 
 
 
@@ -23,17 +23,6 @@ UGrabber::UGrabber()
 void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UPhysicsHandleComponent* PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
-	if (PhysicsHandle != nullptr)
-	{
-		UE_LOG(LogTemp, Display, TEXT("Got Physics Handle: %s"), *PhysicsHandle->GetName());
-	}else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No Physics Handle Found!"));
-	}
-	
-
 }
 
 
@@ -41,10 +30,29 @@ void UGrabber::BeginPlay()
 void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
+
+	if (PhysicsHandle == nullptr)
+	{
+		return;
+	}
+
+	FVector TargetLocation = GetComponentLocation() + GetForwardVector() * HoldDistance;	// 현재 위치 + 잡는 위치 
+	PhysicsHandle->SetTargetLocationAndRotation(TargetLocation, GetComponentRotation());
+
 }
 
 void UGrabber::Grab()
 {
+	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
+
+	if (PhysicsHandle == nullptr)
+	{
+		return;
+	}
+
+	
 	FVector Start = GetComponentLocation();
 	FVector End = Start + GetForwardVector() * MaxGrabDiatance;
 
@@ -65,18 +73,15 @@ void UGrabber::Grab()
 		Sphere
 		);
 
+	// Hit 했으면 Component를 가져와서 정확한 위치를 잡아 Rotation을 받아온다
 	if (HashHit)
 	{
-		// HitResult Location : 충돌이 발생한 위치(Impact Point보다는 덜 구체적인 값)
-		// HitResult ImpactPoint : 충돌이 실제로 발생한 정확한 지점의 월드 공간 좌표 
-		DrawDebugSphere(GetWorld(), HitResult.Location, 10, 10, FColor::Green, false, 5);
-		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10, 10, FColor::Red, false, 5);
-		
-		AActor* HitActor = HitResult.GetActor();
-		UE_LOG(LogTemp, Display, TEXT("Hit actor: %s"), *HitActor->GetActorNameOrLabel());
-	}else
-	{
-		UE_LOG(LogTemp, Display, TEXT("No Hit"));
+		PhysicsHandle->GrabComponentAtLocationWithRotation(
+			HitResult.GetComponent(),
+			NAME_None,
+			HitResult.ImpactPoint,	// 정확한 위치를 잡아야 하므로 Impact Point
+			GetComponentRotation()	// Grabber의 Rotation
+		);
 	}
 }
 
@@ -85,3 +90,12 @@ void UGrabber::Release()
 	UE_LOG(LogTemp, Display, TEXT("Released Grabber"));
 }
 
+UPhysicsHandleComponent* UGrabber::GetPhysicsHandle() const
+{
+	UPhysicsHandleComponent* Result = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	if (Result == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Grabber Requires a UPhysiceHandleComponent."));
+	}
+	return Result;
+}
