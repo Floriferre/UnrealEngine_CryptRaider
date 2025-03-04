@@ -14,3 +14,6 @@ Saved/
 *.sln
 *.xcodeproj
 
+.vs
+.idea
+
