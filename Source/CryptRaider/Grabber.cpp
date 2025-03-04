@@ -38,8 +38,14 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 		return;
 	}
 
-	FVector TargetLocation = GetComponentLocation() + GetForwardVector() * HoldDistance;	// 현재 위치 + 잡는 위치 
-	PhysicsHandle->SetTargetLocationAndRotation(TargetLocation, GetComponentRotation());
+	// 
+	if (PhysicsHandle->GetGrabbedComponent()!=nullptr)
+	{
+		FVector TargetLocation = GetComponentLocation() + GetForwardVector() * HoldDistance;	// 현재 위치 + 잡는 위치 
+		PhysicsHandle->SetTargetLocationAndRotation(TargetLocation, GetComponentRotation());
+	}
+
+	
 
 }
 
@@ -76,8 +82,12 @@ void UGrabber::Grab()
 	// Hit 했으면 Component를 가져와서 정확한 위치를 잡아 Rotation을 받아온다
 	if (HashHit)
 	{
+		UPrimitiveComponent* HitComponent = HitResult.GetComponent();
+		HitComponent->WakeAllRigidBodies(); 	// 오랫동안 자극이 없으면 슬립상태가 되어서 클릭이 안된다. 그래서 깨워줘야함!
+
+		
 		PhysicsHandle->GrabComponentAtLocationWithRotation(
-			HitResult.GetComponent(),
+			HitComponent,
 			NAME_None,
 			HitResult.ImpactPoint,	// 정확한 위치를 잡아야 하므로 Impact Point
 			GetComponentRotation()	// Grabber의 Rotation
@@ -87,7 +97,19 @@ void UGrabber::Grab()
 
 void UGrabber::Release()
 {
-	UE_LOG(LogTemp, Display, TEXT("Released Grabber"));
+	UPhysicsHandleComponent* PhysicsHandle = GetPhysicsHandle();
+	if (PhysicsHandle == nullptr)
+	{
+		return;
+	}
+
+
+	
+	if (PhysicsHandle->GetGrabbedComponent() != nullptr)	// 만약 물체를 붙잡고 있다면
+	{
+		PhysicsHandle->GetGrabbedComponent()->WakeAllRigidBodies();	// 오랫동안 자극이 없으면 슬립상태가 되어서 클릭이 안된다. 그래서 깨워줘야함!
+		PhysicsHandle->ReleaseComponent();
+	}
 }
 
 UPhysicsHandleComponent* UGrabber::GetPhysicsHandle() const
