@@ -23,17 +23,26 @@ void UTriggerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	AActor* Actor = GetAcceptableActor();
+	
 	if (Actor!=nullptr)	// overlap되는 것이 있으면 언락 
 	{
-		UE_LOG(LogTemp,Display,TEXT("UNLOCKING"));	
+		Mover->SetShouldMove(true);	// 벽이 움직이게 만들기
 	}
 	else
 	{
 		// overlap되는 것이 없으면 락 
-		UE_LOG(LogTemp,Display,TEXT("RELOCKING"));
+		Mover->SetShouldMove(false);	// 벽이 움직이지 않게 만들기
 	}
 	
 }
+
+
+void UTriggerComponent::SetMover(UMover* NewMover)
+{
+	Mover = NewMover;
+}
+
+
 
 AActor* UTriggerComponent::GetAcceptableActor() const
 {
