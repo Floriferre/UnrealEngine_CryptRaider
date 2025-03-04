@@ -1,0 +1,16 @@
+.vscode
+Content
+DerivedDataCache
+Intermediate
+Saved
+Script
+
+# Build artifacts
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+*.VC.db
+*.sln
+*.xcodeproj
+
